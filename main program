@@ -1,0 +1,60 @@
+import requests
+import speech_recognition as sr
+import webbrowser as wb
+import speak
+import pyglet
+
+chrome_path= 'C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Google Chrome'
+
+r = sr.Recognizer()
+
+with sr.Microphone() as source:
+     print ('Hi LIZA here, speak your city name  ...')
+     audio = r.listen(source)
+     print('wait, recognizing....')
+
+try:
+     city = r.recognize_google(audio) # city name in text form
+     print('I think you said : '+ city)
+     
+except Exception as e:
+     print(e)
+
+api_address = ' http://api.openweathermap.org/data/2.5/weather?appid=d4238c6ed5034f646c1313925ab499cb&q='
+
+#city= input("City Name with/without country name separated by ',' : ")
+url = api_address + city
+json_data = requests.get(url).json()
+
+weather_desc = city +" is having "+ json_data['weather'][0]['description'] +" condition."
+temperature = '{} {} {}'.format('With Temperature : ',"%.2f "%(json_data['main']['temp']-273.5),'degree celcius')
+humidity = '{} {} {}'.format('With Humidity : ',json_data['main']['humidity'],'gm/m^3.' ) 
+wind = '{} {} {} {} {}'.format('With Wind Speed : ',json_data['wind']['speed'],'Knot (',"%.2f "%(1.852*json_data['wind']['speed']),'km/hr)' ) 
+
+Liza = 'Hello , Leeza here , the weather conditions for '+city+' are as follows...'+weather_desc +' '+ temperature +' '+ humidity+' '+wind +' HAVE A good DAY. '
+print('HERE, we go .................3...2...1.')
+
+speak.tts(Liza,'en-us')
+#music = pyglet.media.load('tada.mp3', streaming=False)
+#music.play()
+
+print()
+print(weather_desc)
+print(temperature)
+print(humidity)
+print(wind)
+
+'''
+#copy the below code and save it into a new file named 'speak.py'. this file is imported here in the main file.
+from gtts import gTTS
+import pyglet
+import time,os
+def tts(text,lang):
+     file = gTTS(text=text , lang=lang)
+     file.save('temp.mp3') # filename is temp.mp3
+     music = pyglet.media.load('temp.mp3', streaming=False)
+     music.play()
+     time.sleep(music.duration)
+     os.remove('temp.mp3')
+     
+'''
